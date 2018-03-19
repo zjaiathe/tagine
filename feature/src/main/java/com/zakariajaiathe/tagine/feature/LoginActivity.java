@@ -3,24 +3,21 @@ package com.zakariajaiathe.tagine.feature;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
-
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,6 +30,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -46,13 +44,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -69,6 +60,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
+
         mEmailView = findViewById(R.id.email);
         populateAutoComplete();
 
@@ -147,6 +139,40 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
+    // TODO Create a Button for sign up
+    /*
+    public void addName(View view) {
+        // Add a new student record
+        ContentValues values = new ContentValues();
+        values.put(UsersProvider.USERNAME,
+                ((EditText)findViewById(R.id.editText2)).getText().toString());
+
+        values.put(UsersProvider.PASSWORD,
+                ((EditText)findViewById(R.id.editText3)).getText().toString());
+
+        Uri uri = getContentResolver().insert(
+                UsersProvider.CONTENT_URI, values);
+
+        Toast.makeText(getBaseContext(),
+                uri.toString(), Toast.LENGTH_LONG).show();
+    }
+    */
+    public Vector<String> retrieveUsers() {
+        // Retrieve users logins
+        String URL = "content://com.zakariajaiathe.tagine.feature.UsersProvider";
+
+        Uri users = Uri.parse(URL);
+        Cursor c = managedQuery(users, null, null, null, "username");
+        Vector<String> credentials = new Vector<String>();
+        if (c.moveToFirst()) {
+            do {
+                credentials.addElement(c.getString(c.getColumnIndex(UsersProvider.USERNAME)) +
+                        ":" + c.getString(c.getColumnIndex(UsersProvider.PASSWORD)));
+
+            } while (c.moveToNext());
+        }
+        return credentials;
+    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -325,7 +351,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
+            Vector<String> USERS_CREDENTIALS = retrieveUsers();
+            for (String credential : USERS_CREDENTIALS) {
                 String[] pieces = credential.split(":");
                 if (pieces[0].equals(mEmail)) {
                     // Account exists, return true if the password matches.
@@ -356,5 +383,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
         }
     }
+
 }
 
